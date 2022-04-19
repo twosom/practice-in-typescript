@@ -2,21 +2,28 @@ type Options = {
     bannedWords: Array<string>
 };
 
-function refineText(s: string, options: Options): string {
-    s = s.replace("    ", " ")
-        .replace("\t", " ")
-        .replace("  ", " ")
-        .replace("  ", " ")
-        .replace("  ", " ")
-        .replace("mockist", "*******")
-        .replace("purist", "******");
+function refineText(source: string, options: Options): string {
+    return [normalizeWhiteSpaces, compactWhiteSpaces, maskBannedWords]
+        .reduce((value, filter) => filter(value, options), source)
+}
 
-    if (options) {
-        for (const bannedWord of options.bannedWords) {
-            s = s.replace(bannedWord, "*".repeat(bannedWord.length));
-        }
-    }
-    return s;
+function normalizeWhiteSpaces(source: string) {
+    return source.replace("\t", " ");
+}
+
+function maskBanedWord(source: string, bannedWord: string) {
+    const mask = "*".repeat(bannedWord.length);
+    return source.replace(bannedWord, mask);
+}
+
+function maskBannedWords(source: string, options: Options) {
+    return options ? options.bannedWords.reduce(maskBanedWord, source) : source;
+}
+
+function compactWhiteSpaces(source: string) {
+    return source.indexOf("  ") < 0
+        ? source
+        : compactWhiteSpaces(source.replace("  ", " "));
 }
 
 module.exports = refineText;
