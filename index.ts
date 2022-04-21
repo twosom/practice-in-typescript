@@ -3,24 +3,32 @@ type Options = {
 };
 
 function refineText(source: string, options: Options): string {
-    return [normalizeWhiteSpaces, compactWhiteSpaces, maskBannedWords]
-        .reduce((value, filter) => filter(value, options), source)
+    return [
+        normalizeWhiteSpaces,
+        compactWhiteSpaces,
+        maskBannedWords,
+        trimWhitespaces,
+    ].reduce((value, filter) => filter(value, options), source)
 }
 
-function normalizeWhiteSpaces(source: string) {
+function trimWhitespaces(value: string): string {
+    return value.trim();
+}
+
+function normalizeWhiteSpaces(source: string): string {
     return source.replace("\t", " ");
 }
 
-function maskBanedWord(source: string, bannedWord: string) {
+function maskBanedWord(source: string, bannedWord: string): string {
     const mask = "*".repeat(bannedWord.length);
     return source.replace(bannedWord, mask);
 }
 
-function maskBannedWords(source: string, options: Options) {
+function maskBannedWords(source: string, options: Options): string {
     return options ? options.bannedWords.reduce(maskBanedWord, source) : source;
 }
 
-function compactWhiteSpaces(source: string) {
+function compactWhiteSpaces(source: string): string {
     return source.indexOf("  ") < 0
         ? source
         : compactWhiteSpaces(source.replace("  ", " "));
